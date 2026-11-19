@@ -6,7 +6,7 @@ import EmojiPicker from "emoji-picker-react";
 import MessageList from "./MessageList";
 import "./chat.css";
 
-const socket = io("http://localhost:5001");
+const socket = io("https://chatapplicationbackend-delta.vercel.app");
 
 export const Chat = ({ user }) => {
   const [users, setUsers] = useState([]);
@@ -33,7 +33,7 @@ export const Chat = ({ user }) => {
     const fetchUsers = async () => {
       try {
         const { data } = await axios.get(
-          "http://localhost:5001/users",
+          "https://chatapplicationbackend-delta.vercel.app/users",
           {
             params: { currentUser: user.username },
           }
@@ -72,49 +72,24 @@ export const Chat = ({ user }) => {
     };
 
     // Receive typing event
-    // const handleTyping = (data) => {
-    //   console.log("Typing event received:", data);
-    //   console.log("Sender:", data.username);
-    //   console.log("Current Chat:", currentChat);
-    
-
-    //   const isMatchingUser =
-    //     data.username?.trim().toLowerCase() ===
-    //     currentChat?.trim().toLowerCase();
-
-    //   console.log("Match:", isMatchingUser);
-
-    //   if (isMatchingUser) {
-    //     setIsTyping(true);
-    //   }
-      
-    // };
-
-  const handleTyping = (data) => {
-  console.log("Typing event received:", data);
-  setIsTyping(true);
-};
+    const handleTyping = (data) => {
+      console.log("Typing event received:", data);
+      setIsTyping(true);
+    };
 
     // Receive stop typing event
-    // const handleStopTyping = (data) => {
-    //   console.log("Stop typing event received:", data);
-
-    //   const isMatchingUser =
-    //     data.username?.trim().toLowerCase() ===
-    //     currentChat?.trim().toLowerCase();
-
-    //   if (isMatchingUser) {
-    //     setIsTyping(false);
-    //   }
-    // };
-
-  const handleStopTyping = () => {
-  setIsTyping(false);
-};
+    const handleStopTyping = () => {
+      setIsTyping(false);
+    };
 
     // Message sent confirmation
     const handleMessageSent = (data) => {
-      setMessages((prev) => [...prev, data]);
+      if (
+        data.sender === user.username &&
+        data.receiver === currentChat
+      ) {
+        setMessages((prev) => [...prev, data]);
+      }
     };
 
     // Update message status
@@ -154,7 +129,7 @@ export const Chat = ({ user }) => {
       setShowEmojiPicker(false);
 
       const { data } = await axios.get(
-        "http://localhost:5001/messages",
+        "https://chatapplicationbackend-delta.vercel.app/messages",
         {
           params: {
             sender: user.username,
@@ -195,6 +170,7 @@ export const Chat = ({ user }) => {
 
     socket.emit("send_message", messageData);
 
+    // Stop typing when message is sent
     socket.emit("stop_typing", {
       sender: user.username,
       receiver: currentChat,
@@ -208,61 +184,30 @@ export const Chat = ({ user }) => {
   };
 
   // Handle typing
-  // const handleTypingInput = (e) => {
-  //   const value = e.target.value;
-
-  //   setCurrentMessage(value);
-
-  //   if (!currentChat) return;
-
-  //   if (value.trim()) {
-  //     console.log("Sending typing event:", {
-  //       sender: user.username,
-  //       receiver: currentChat,
-  //     });
-
-  //     socket.emit("typing", {
-  //       sender: user.username,
-  //       receiver: currentChat,
-  //     });
-
-  //     clearTimeout(typingTimeout.current);
-
-  //     typingTimeout.current = setTimeout(() => {
-  //       socket.emit("stop_typing", {
-  //         sender: user.username,
-  //         receiver: currentChat,
-  //       });
-  //     }, 1500);
-  //   } else {
-  //     clearTimeout(typingTimeout.current);
-
-  //     // socket.emit("stop_typing", {
-  //     //   sender: user.username,
-  //     //   receiver: currentChat,
-  //     // });
-  //   }
-  // };
-
   const handleTypingInput = (e) => {
-  const value = e.target.value;
+    const value = e.target.value;
 
-  setCurrentMessage(value);
+    setCurrentMessage(value);
 
-  if (!currentChat) return;
+    if (!currentChat) return;
 
-  if (value.trim()) {
-    console.log("Sending typing event:", {
-      sender: user.username,
-      receiver: currentChat,
-    });
+    if (value.trim()) {
+      console.log("Sending typing event:", {
+        sender: user.username,
+        receiver: currentChat,
+      });
 
-    socket.emit("typing", {
-      sender: user.username,
-      receiver: currentChat,
-    });
-  }
-};
+      socket.emit("typing", {
+        sender: user.username,
+        receiver: currentChat,
+      });
+    } else {
+      socket.emit("stop_typing", {
+        sender: user.username,
+        receiver: currentChat,
+      });
+    }
+  };
 
   // Add selected emoji
   const handleEmojiClick = (emojiData) => {
@@ -276,11 +221,11 @@ export const Chat = ({ user }) => {
     };
   }, []);
 
-  console.log("Peter isTyping state:", isTyping);
-
   return (
     <div className="chat-container">
-      <h2>Welcome, {user.username}</h2>
+      <h2 className="welcome-heading">
+        Welcome, {user.username}
+      </h2>
 
       <div className="chat-list">
         <h3>Chats</h3>
@@ -315,6 +260,7 @@ export const Chat = ({ user }) => {
 
           <div className="message-field">
             <button
+              type="button"
               className="emoji-button"
               onClick={() =>
                 setShowEmojiPicker((prev) => !prev)
@@ -327,15 +273,16 @@ export const Chat = ({ user }) => {
               <div className="emoji-picker-container">
                 <EmojiPicker
                   onEmojiClick={handleEmojiClick}
+                  skinTonesDisabled={true}
                 />
               </div>
             )}
 
             <input
               type="text"
+              className="message-input"
               placeholder="Type a message..."
               value={currentMessage}
-              style={{ minWidth: "400px" }}
               onChange={handleTypingInput}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
@@ -345,6 +292,7 @@ export const Chat = ({ user }) => {
             />
 
             <button
+              type="button"
               className="btn-prime"
               onClick={sendMessage}
             >

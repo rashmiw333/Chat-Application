@@ -214,12 +214,12 @@ export const Chat = ({ user }) => {
     setCurrentMessage((prev) => prev + emojiData.emoji);
   };
 
-  // Cleanup typing timeout
-  useEffect(() => {
-    return () => {
-      clearTimeout(typingTimeout.current);
-    };
-  }, []);
+  // // Cleanup typing timeout
+  // useEffect(() => {
+  //   return () => {
+  //     clearTimeout(typingTimeout.current);
+  //   };
+  // }, []);
 
   return (
     <div className="chat-container">

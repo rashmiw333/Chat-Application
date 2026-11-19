@@ -1,0 +1,104 @@
+.chat-list {
+    border-right: 1px solid #ccc;
+    padding: 10px;
+    width: 200px;
+    float: left;
+  }
+  
+  .chat-user {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .chat-user:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .chat-user.active {
+    background-color: #d0f0d0;
+  }
+  
+  .chat-window {
+    margin-left: 210px;
+    padding: 10px;
+  }
+    
+  .btn-primary{
+    background-color: #daf8cb;
+  }
+  .message-field{
+    min-width: 500px
+  }
+
+
+/* Message timestamps and receipts */
+
+.message-info {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 5px;
+    margin-top: 4px;
+    font-size: 11px;
+    color: #777;
+}
+
+.sent-tick {
+    color: #777;
+}
+
+.delivered-tick {
+    color: #777;
+}
+
+.read-tick {
+    color: #2196f3;
+    font-weight: bold;
+}
+
+/* Typing indicator */
+
+.typing-indicator {
+  color: #888;
+  font-size: 14px;
+  font-style: italic;
+  text-align: center;
+  margin: 8px 0 12px;
+  min-height: 20px;
+}
+
+/* .typing-indicator {
+    display: block;
+    color: green;
+    font-size: 14px;
+    font-style: italic;
+    margin: 10px;
+} */
+
+/* Emoji picker */
+
+.message-field {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.emoji-button {
+    border: none;
+    background: transparent;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.emoji-picker-container {
+    position: absolute;
+    bottom: 55px;
+    left: 0;
+    z-index: 100;
+}
+
+/* .emoji-picker-container [data-epr-part="search-clear"] {
+    display: none !important;
+} */

@@ -1,24 +1,28 @@
+
 import React, { useState } from "react";
 import axios from "axios";
 
-const Register = ({ setUser }) => {
+const Register = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [registerationSuccess, setRegistrationSuccess] = useState(null);
+  const [registrationSuccess, setRegistrationSuccess] = useState(null);
 
   const handleRegister = async () => {
     try {
-      const { data } = await axios.post("https://chatapplicationbackend-delta.vercel.app/auth/register", {
-        username,
-        password,
-      });
-
-      setRegistrationSuccess(
-        "You are registered successfully. Proceed to login."
+      const { data } = await axios.post(
+        "https://chat-backup-backend.vercel.app/auth/register",
+        {
+          username,
+          password,
+        }
       );
-      setUser(data);
+
+      setRegistrationSuccess(data.message);
+
+      setUsername("");
+      setPassword("");
+
     } catch (error) {
-      console.error(error.response?.data?.message || "Error registering user");
       setRegistrationSuccess(
         error.response?.data?.message || "Error registering user"
       );
@@ -32,6 +36,7 @@ const Register = ({ setUser }) => {
       <div className="card-body px-5">
         <h2>Register</h2>
         <p>Not a user yet? Register here</p>
+
         <input
           type="text"
           placeholder="Username"
@@ -39,6 +44,7 @@ const Register = ({ setUser }) => {
           className="form-control form-control-lg mt-3"
           onChange={(e) => setUsername(e.target.value)}
         />
+
         <input
           type="password"
           placeholder="Password"
@@ -46,13 +52,15 @@ const Register = ({ setUser }) => {
           className="form-control form-control-lg mt-3"
           onChange={(e) => setPassword(e.target.value)}
         />
+
         <button
           className="btn btn-success btn-lg mt-3"
           onClick={handleRegister}
         >
           Register
         </button>
-        {registerationSuccess && <p>{registerationSuccess}</p>}
+
+        {registrationSuccess && <p>{registrationSuccess}</p>}
       </div>
     </div>
   );

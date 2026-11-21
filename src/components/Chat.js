@@ -6,8 +6,12 @@ import EmojiPicker from "emoji-picker-react";
 import MessageList from "./MessageList";
 import "./chat.css";
 
-const API_URL = "https://chatapplicationbackend-delta.vercel.app";
-const socket = io(API_URL);
+const API_URL = "https://chat-backup-backend.vercel.app";
+
+const socket = io(API_URL, {
+    path: "/socket.io",
+    transports: ["websocket"]
+});
 
 export const Chat = ({ user }) => {
   const [users, setUsers] = useState([]);

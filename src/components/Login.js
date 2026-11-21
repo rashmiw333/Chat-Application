@@ -1,6 +1,7 @@
 
 import React, { useState } from "react";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const Login = ({ setUser }) => {
   const [username, setUsername] = useState("");
@@ -19,8 +20,12 @@ const Login = ({ setUser }) => {
       localStorage.setItem("token", data.token);
       setUser(data);
 
+      toast.success("Login successful!");
+
     } catch (error) {
-      console.error(error.response?.data?.message || "Error logging in");
+      toast.error(
+        error.response?.data?.message || "Error logging in"
+      );
     }
   };
 

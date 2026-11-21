@@ -1,11 +1,11 @@
 
 import React, { useState } from "react";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const Register = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [registrationSuccess, setRegistrationSuccess] = useState(null);
 
   const handleRegister = async () => {
     try {
@@ -17,17 +17,15 @@ const Register = () => {
         }
       );
 
-      setRegistrationSuccess(data.message);
+      toast.success("Registration successful. Please login.");
 
       setUsername("");
       setPassword("");
 
     } catch (error) {
-      setRegistrationSuccess(
+      toast.error(
         error.response?.data?.message || "Error registering user"
       );
-    } finally {
-      setTimeout(() => setRegistrationSuccess(null), 2000);
     }
   };
 
@@ -59,8 +57,6 @@ const Register = () => {
         >
           Register
         </button>
-
-        {registrationSuccess && <p>{registrationSuccess}</p>}
       </div>
     </div>
   );

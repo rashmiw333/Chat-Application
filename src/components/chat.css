@@ -1,50 +1,104 @@
 
-/* Main chat container */
+/* Remove default browser spacing */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Full page chat application */
 
 .chat-container {
-  width: 95%;
-  max-width: 1400px;
-  margin: 20px auto;
-  padding: 25px;
+  width: 100%;
+  height: 100vh;
+  margin: 0;
+  padding: 15px 30px 25px;
   background-color: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border-radius: 0;
+  box-shadow: none;
 
   display: grid;
-  grid-template-columns: 260px minmax(0, 1fr);
-  gap: 20px;
-  align-items: start;
+  grid-template-columns: 280px minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr);
+  column-gap: 25px;
+  overflow: hidden;
+}
+
+/* Chat App title */
+
+.app-title {
+  grid-column: 1 / -1;
+  text-align: center;
+  font-size: 34px;
+  font-weight: 500;
+  margin: 0 0 5px;
 }
 
 /* Welcome heading */
 
-.chat-container h2 {
+.welcome-heading {
   grid-column: 1 / -1;
   text-align: center;
-  margin: 5px 0 20px;
-  font-size: 32px;
+  font-size: 30px;
   font-weight: 500;
+  margin: 0 0 20px;
 }
 
-/* Chat list */
+/* Left chat list */
 
 .chat-list {
+  grid-column: 1;
+  grid-row: 3;
   width: 100%;
-  float: none;
+  min-height: 0;
   margin: 0;
-  padding: 10px;
+  padding: 0 15px 10px 0;
   border-right: 1px solid #ccc;
-  text-align: center;
+  text-align: left;
+  overflow-y: auto;
 }
 
+/* Chats heading */
+
 .chat-list h3 {
+  text-align: left;
   font-size: 26px;
   font-weight: 500;
-  margin: 5px 0 15px;
+  margin: 0 0 12px;
+}
+
+/* Search box */
+
+.search-input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 12px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  outline: none;
+}
+
+.search-input:focus {
+  border-color: #999;
+}
+
+/* User list */
+
+.users-list {
+  width: 100%;
 }
 
 .chat-user {
-  padding: 14px 10px;
+  padding: 12px 10px;
   cursor: pointer;
   border-bottom: 1px solid #eee;
   font-size: 18px;
@@ -59,22 +113,29 @@
   background-color: #d0f0d0;
 }
 
-/* Chat window */
+/* Right chat window */
 
 .chat-window {
+  grid-column: 2;
+  grid-row: 3;
   min-width: 0;
+  min-height: 0;
   width: 100%;
   margin: 0;
-  padding: 10px;
+  padding: 0 0 10px 0;
+
   display: flex;
   flex-direction: column;
 }
 
-.chat-window h5 {
-  text-align: center;
+/* Conversation heading aligned with Chats */
+
+.conversation-heading {
+  text-align: left;
   font-size: 22px;
   font-weight: 500;
-  margin: 5px 0 10px;
+  margin: 0 0 10px;
+  flex-shrink: 0;
 }
 
 /* Typing indicator */
@@ -83,9 +144,19 @@
   color: #888;
   font-size: 14px;
   font-style: italic;
-  text-align: center;
+  text-align: left;
   margin: 5px 0 12px;
   min-height: 20px;
+  flex-shrink: 0;
+}
+
+/* Messages area */
+
+.messages-area {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  width: 100%;
 }
 
 /* Message input area */
@@ -93,11 +164,13 @@
 .message-field {
   position: relative;
   display: flex;
+  flex-direction: row;
   align-items: center;
   gap: 12px;
   width: 100%;
-  margin-top: 15px;
+  margin-top: 12px;
   padding: 10px 0;
+  flex-shrink: 0;
 }
 
 .message-input {
@@ -116,6 +189,11 @@
 }
 
 /* Emoji button */
+
+.emoji-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
 
 .emoji-button {
   flex-shrink: 0;
@@ -136,6 +214,7 @@
   border-radius: 6px;
   font-size: 16px;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .btn-prime:hover {
@@ -186,21 +265,30 @@
 
 @media (max-width: 768px) {
   .chat-container {
-    width: 96%;
-    padding: 15px;
+    width: 100%;
+    height: 100vh;
+    padding: 12px 15px;
     grid-template-columns: 1fr;
-    gap: 12px;
+    grid-template-rows: auto auto minmax(0, 1fr);
+    row-gap: 12px;
   }
 
-  .chat-container h2 {
-    font-size: 26px;
-    margin-bottom: 10px;
+  .app-title {
+    font-size: 28px;
+  }
+
+  .welcome-heading {
+    font-size: 25px;
+    margin-bottom: 5px;
   }
 
   .chat-list {
+    grid-column: 1;
+    grid-row: 3;
     border-right: none;
     border-bottom: 1px solid #ccc;
-    padding: 5px;
+    padding: 0 0 10px;
+    max-height: 220px;
   }
 
   .chat-list h3 {
@@ -216,10 +304,13 @@
   }
 
   .chat-window {
-    padding: 5px;
+    grid-column: 1;
+    grid-row: 4;
+    min-height: 0;
+    padding: 5px 0;
   }
 
-  .chat-window h5 {
+  .conversation-heading {
     font-size: 19px;
   }
 
@@ -247,14 +338,21 @@
 
 @media (max-width: 480px) {
   .chat-container {
-    width: 100%;
     padding: 10px;
-    margin: 5px auto;
-    border-radius: 0;
+    grid-template-rows: auto auto auto minmax(0, 1fr);
+    overflow-y: auto;
   }
 
-  .chat-container h2 {
-    font-size: 23px;
+  .app-title {
+    font-size: 25px;
+  }
+
+  .welcome-heading {
+    font-size: 22px;
+  }
+
+  .chat-list {
+    max-height: 190px;
   }
 
   .chat-list h3 {
@@ -266,7 +364,7 @@
     padding: 8px 10px;
   }
 
-  .chat-window h5 {
+  .conversation-heading {
     font-size: 17px;
   }
 

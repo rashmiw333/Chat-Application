@@ -6,7 +6,8 @@ import EmojiPicker from "emoji-picker-react";
 import MessageList from "./MessageList";
 import "./chat.css";
 
-const socket = io("https://chatapplicationbackend-delta.vercel.app");
+const API_URL = "https://chatapplicationbackend-delta.vercel.app/";
+const socket = io(API_URL);
 
 export const Chat = ({ user }) => {
   const [users, setUsers] = useState([]);
@@ -15,6 +16,7 @@ export const Chat = ({ user }) => {
   const [currentMessage, setCurrentMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [search, setSearch] = useState("");
 
   const typingTimeout = useRef(null);
 
@@ -32,12 +34,9 @@ export const Chat = ({ user }) => {
 
     const fetchUsers = async () => {
       try {
-        const { data } = await axios.get(
-          "https://chatapplicationbackend-delta.vercel.app/users",
-          {
-            params: { currentUser: user.username },
-          }
-        );
+        const { data } = await axios.get(`${API_URL}/users`, {
+          params: { currentUser: user.username },
+        });
 
         setUsers(data);
       } catch (error) {
@@ -57,32 +56,49 @@ export const Chat = ({ user }) => {
     if (!currentChat) return;
 
     const receiveMessage = (data) => {
-      if (
-        data.sender === currentChat &&
-        data.receiver === user.username
-      ) {
-        setMessages((prev) => [...prev, data]);
+  if (
+    data.sender === currentChat &&
+    data.receiver === user.username
+  ) {
+    setMessages((prev) => [...prev, data]);
 
-        // Confirm delivery and read status
-        if (data._id) {
-          socket.emit("message_delivered", data._id);
-          socket.emit("message_read", data._id);
-        }
+    if (data._id) {
+      socket.emit("message_delivered", data._id);
+      socket.emit("message_read", data._id);
+    }
+  }
+
+  // Add sender to chat list if not already present
+  if (data.receiver === user.username) {
+    setUsers((prevUsers) => {
+      const senderExists = prevUsers.some(
+        (u) => u.username === data.sender
+      );
+
+      if (senderExists) {
+        return prevUsers;
       }
-    };
 
-    // Receive typing event
+      return [
+        ...prevUsers,
+        {
+          _id: data.sender,
+          username: data.sender,
+        },
+      ];
+    });
+  }
+};
+
     const handleTyping = (data) => {
       console.log("Typing event received:", data);
       setIsTyping(true);
     };
 
-    // Receive stop typing event
     const handleStopTyping = () => {
       setIsTyping(false);
     };
 
-    // Message sent confirmation
     const handleMessageSent = (data) => {
       if (
         data.sender === user.username &&
@@ -92,7 +108,6 @@ export const Chat = ({ user }) => {
       }
     };
 
-    // Update message status
     const handleMessageStatus = (data) => {
       setMessages((prev) =>
         prev.map((msg) =>
@@ -128,24 +143,19 @@ export const Chat = ({ user }) => {
       setCurrentMessage("");
       setShowEmojiPicker(false);
 
-      const { data } = await axios.get(
-        "https://chatapplicationbackend-delta.vercel.app/messages",
-        {
-          params: {
-            sender: user.username,
-            receiver,
-          },
-        }
-      );
+      const { data } = await axios.get(`${API_URL}/messages`, {
+        params: {
+          sender: user.username,
+          receiver,
+        },
+      });
 
-      // Mark received messages as read
       const updatedMessages = data.map((msg) => {
         if (
           msg.receiver === user.username &&
           msg.status !== "read"
         ) {
           socket.emit("message_read", msg._id);
-
           return { ...msg, status: "read" };
         }
 
@@ -170,7 +180,6 @@ export const Chat = ({ user }) => {
 
     socket.emit("send_message", messageData);
 
-    // Stop typing when message is sent
     socket.emit("stop_typing", {
       sender: user.username,
       receiver: currentChat,
@@ -186,17 +195,11 @@ export const Chat = ({ user }) => {
   // Handle typing
   const handleTypingInput = (e) => {
     const value = e.target.value;
-
     setCurrentMessage(value);
 
     if (!currentChat) return;
 
     if (value.trim()) {
-      console.log("Sending typing event:", {
-        sender: user.username,
-        receiver: currentChat,
-      });
-
       socket.emit("typing", {
         sender: user.username,
         receiver: currentChat,
@@ -214,15 +217,16 @@ export const Chat = ({ user }) => {
     setCurrentMessage((prev) => prev + emojiData.emoji);
   };
 
-  // // Cleanup typing timeout
-  // useEffect(() => {
-  //   return () => {
-  //     clearTimeout(typingTimeout.current);
-  //   };
-  // }, []);
+  // Filter users
+  const filteredUsers = users.filter((u) =>
+    u.username.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="chat-container">
+
+      <h1 className="app-title">Chat App</h1>
+
       <h2 className="welcome-heading">
         Welcome, {user.username}
       </h2>
@@ -230,77 +234,96 @@ export const Chat = ({ user }) => {
       <div className="chat-list">
         <h3>Chats</h3>
 
-        {users.map((u) => (
-          <div
-            key={u._id}
-            className={`chat-user ${
-              currentChat === u.username ? "active" : ""
-            }`}
-            onClick={() => fetchMessages(u.username)}
-          >
-            {u.username}
-          </div>
-        ))}
+        <input
+          type="text"
+          className="search-input"
+          placeholder="Search users..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+
+        <div className="users-list">
+          {filteredUsers.map((u) => (
+            <div
+              key={u._id}
+              className={`chat-user ${
+                currentChat === u.username ? "active" : ""
+              }`}
+              onClick={() => fetchMessages(u.username)}
+            >
+              {u.username}
+            </div>
+          ))}
+        </div>
       </div>
 
-      {currentChat && (
-        <div className="chat-window">
-          <h5>You are chatting with {currentChat}</h5>
+      <div className="chat-window">
+        {currentChat && (
+          <>
+            <h5 className="conversation-heading">
+              You are chatting with {currentChat}
+            </h5>
 
-          {isTyping && (
-            <p className="typing-indicator">
-              {currentChat} is typing...
-            </p>
-          )}
-
-          <MessageList
-            messages={messages}
-            user={user}
-          />
-
-          <div className="message-field">
-            <button
-              type="button"
-              className="emoji-button"
-              onClick={() =>
-                setShowEmojiPicker((prev) => !prev)
-              }
-            >
-              😊
-            </button>
-
-            {showEmojiPicker && (
-              <div className="emoji-picker-container">
-                <EmojiPicker
-                  onEmojiClick={handleEmojiClick}
-                  skinTonesDisabled={true}
-                />
-              </div>
+            {isTyping && (
+              <p className="typing-indicator">
+                {currentChat} is typing...
+              </p>
             )}
 
-            <input
-              type="text"
-              className="message-input"
-              placeholder="Type a message..."
-              value={currentMessage}
-              onChange={handleTypingInput}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  sendMessage();
-                }
-              }}
-            />
+            <div className="messages-area">
+              <MessageList
+                messages={messages}
+                user={user}
+              />
+            </div>
 
-            <button
-              type="button"
-              className="btn-prime"
-              onClick={sendMessage}
-            >
-              Send
-            </button>
-          </div>
-        </div>
-      )}
+            <div className="message-field">
+              <div className="emoji-wrapper">
+                <button
+                  type="button"
+                  className="emoji-button"
+                  onClick={() =>
+                    setShowEmojiPicker((prev) => !prev)
+                  }
+                >
+                  😊
+                </button>
+
+                {showEmojiPicker && (
+                  <div className="emoji-picker-container">
+                    <EmojiPicker
+                      onEmojiClick={handleEmojiClick}
+                      skinTonesDisabled={true}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <input
+                type="text"
+                className="message-input"
+                placeholder="Type a message..."
+                value={currentMessage}
+                onChange={handleTypingInput}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    sendMessage();
+                  }
+                }}
+              />
+
+              <button
+                type="button"
+                className="btn-prime"
+                onClick={sendMessage}
+              >
+                Send
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+
     </div>
   );
 };

@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import Login from "./components/Login";
 import Register from "./components/Register";
@@ -10,13 +11,15 @@ const App = () => {
 
   return (
     <div className="app">
-      <h1>Chat App</h1>
+      {/* <h1>Chat App</h1> */}
+
       {!user ? (
         <div className="container mt-5 text-center">
           <div className="row">
             <div className="col-md-6">
               <Register setUser={setUser} />
             </div>
+
             <div className="col-md-6">
               <Login setUser={setUser} />
             </div>

@@ -327,3 +327,4 @@ export const Chat = ({ user }) => {
     </div>
   );
 };
+

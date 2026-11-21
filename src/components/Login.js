@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import axios from "axios";
 
@@ -7,11 +8,17 @@ const Login = ({ setUser }) => {
 
   const handleLogin = async () => {
     try {
-      const { data } = await axios.post("https://chat-backup-backend.vercel.app/auth/login", {
-        username,
-        password,
-      });
+      const { data } = await axios.post(
+        "https://chat-backup-backend.vercel.app/auth/login",
+        {
+          username,
+          password,
+        }
+      );
+
+      localStorage.setItem("token", data.token);
       setUser(data);
+
     } catch (error) {
       console.error(error.response?.data?.message || "Error logging in");
     }
@@ -22,6 +29,7 @@ const Login = ({ setUser }) => {
       <div className="card-body px-5">
         <h2>Login</h2>
         <p>Login with your credentials to continue.</p>
+
         <input
           type="text"
           placeholder="Username"
@@ -29,6 +37,7 @@ const Login = ({ setUser }) => {
           className="form-control form-control-lg mt-3"
           onChange={(e) => setUsername(e.target.value)}
         />
+
         <input
           type="password"
           placeholder="Password"
@@ -37,7 +46,10 @@ const Login = ({ setUser }) => {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <button className="btn btn-success btn-lg mt-3" onClick={handleLogin}>
+        <button
+          className="btn btn-success btn-lg mt-3"
+          onClick={handleLogin}
+        >
           Login
         </button>
       </div>

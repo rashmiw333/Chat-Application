@@ -13,7 +13,7 @@ const socket = io(API_URL, {
     transports: ["websocket"]
 });
 
-export const Chat = ({ user }) => {
+export const Chat = ({ user , onLogout  }) => {
   const [users, setUsers] = useState([]);
   const [currentChat, setCurrentChat] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -32,9 +32,11 @@ export const Chat = ({ user }) => {
 
     socket.on("connect", registerUser);
 
-    if (socket.connected) {
-      registerUser();
-    }
+     if (!socket.connected) {
+        socket.connect();
+      } else {
+        registerUser();
+}
 
     const fetchUsers = async () => {
       try {
@@ -231,6 +233,12 @@ export const Chat = ({ user }) => {
     u.username.toLowerCase().includes(search.toLowerCase())
   );
 
+  //logout
+  const handleLogout = () => {
+    socket.disconnect();
+    onLogout();
+};
+
   return (
     <div className="chat-container">
 
@@ -239,6 +247,13 @@ export const Chat = ({ user }) => {
       <h2 className="welcome-heading">
         Welcome, {user.username}
       </h2>
+
+      <button
+      className="logout-btn"
+       onClick={handleLogout}
+      >
+       Logout
+      </button>
 
       <div className="chat-list">
         <h3>Chats</h3>

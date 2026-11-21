@@ -9,15 +9,18 @@ import "bootstrap/dist/css/bootstrap.min.css";
 const App = () => {
   const [user, setUser] = useState(null);
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setUser(null);
+  };
+
   return (
     <div className="app">
-      {/* <h1>Chat App</h1> */}
-
       {!user ? (
         <div className="container mt-5 text-center">
           <div className="row">
             <div className="col-md-6">
-              <Register setUser={setUser} />
+              <Register />
             </div>
 
             <div className="col-md-6">
@@ -26,11 +29,10 @@ const App = () => {
           </div>
         </div>
       ) : (
-        <Chat user={user} />
+        <Chat user={user} onLogout={handleLogout} />
       )}
     </div>
   );
 };
 
 export default App;
-

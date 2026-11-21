@@ -24,7 +24,7 @@ export const Chat = ({ user }) => {
 
   const typingTimeout = useRef(null);
 
-  // Register user and fetch users
+    // Register user and fetch users
   useEffect(() => {
     const registerUser = () => {
       socket.emit("register_user", user.username);
@@ -48,10 +48,15 @@ export const Chat = ({ user }) => {
       }
     };
 
+    // Fetch users immediately
     fetchUsers();
+
+    // Refresh user list every 5 seconds
+    const userRefreshInterval = setInterval(fetchUsers, 5000);
 
     return () => {
       socket.off("connect", registerUser);
+      clearInterval(userRefreshInterval);
     };
   }, [user.username]);
 
